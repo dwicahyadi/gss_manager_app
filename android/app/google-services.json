@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "157852529176",
+    "project_id": "gisa-47738",
+    "storage_bucket": "gisa-47738.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:157852529176:android:0866a751560eade647096d",
+        "android_client_info": {
+          "package_name": "com.gisagroup.mgr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkZkSzBLN4JgV85jOeW2ioNSqOSbO6-CI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
