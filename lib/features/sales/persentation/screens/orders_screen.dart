@@ -45,16 +45,31 @@ class _OrdersScreenState extends State<OrdersScreen> {
         )),
       child: Scaffold(
         appBar: AppBar(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Orders List'),
-              Text(
-                'Branch: ${widget.branch.name}',
-                style: const TextStyle(fontSize: 12),
-              ),
-            ],
-          ),
+          title: _isSearching
+              ? TextField(
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Search customer name...',
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onChanged: (query) {
+                    setState(() {
+                      _searchQuery = query;
+                    });
+                  },
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Orders List'),
+                    Text(
+                      'Branch: ${widget.branch.name}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
           actions: [
             IconButton(
               icon: Icon(_isSearching ? Icons.close : Icons.search),
@@ -68,34 +83,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
               },
             ),
           ],
-          bottom: _isSearching
-              ? PreferredSize(
-                  preferredSize: const Size.fromHeight(48.0),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search orders...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 0, horizontal: 16.0),
-                        prefixIcon:
-                            const Icon(Icons.search, color: Colors.grey),
-                      ),
-                      onChanged: (query) {
-                        setState(() {
-                          _searchQuery = query;
-                        });
-                      },
-                    ),
-                  ),
-                )
-              : null,
         ),
         body: BlocBuilder<OrderListBloc, OrdersState>(
           builder: (context, state) {
@@ -103,12 +90,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
               return const Center(child: CircularProgressIndicator());
             } else if (state is OrdersLoaded) {
               final filteredOrders = state.orders.where((order) {
-                return order.orderCode
-                        .toLowerCase()
-                        .contains(_searchQuery.toLowerCase()) ||
-                    order.customer.name
-                        .toLowerCase()
-                        .contains(_searchQuery.toLowerCase());
+                return order.customer.name
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase());
               }).toList();
 
               return ListView.builder(
@@ -123,10 +107,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             padding: const EdgeInsets.all(16.0),
                             child: ElevatedButton(
                               style: ButtonStyle(
-                                  backgroundColor: WidgetStateProperty.all(
-                                      Theme.of(context).primaryColor),
-                                  foregroundColor:
-                                      WidgetStateProperty.all(Colors.white)),
+                                backgroundColor: MaterialStateProperty.all(
+                                    Theme.of(context).primaryColor),
+                                foregroundColor:
+                                    MaterialStateProperty.all(Colors.white),
+                              ),
                               onPressed: () {
                                 context
                                     .read<OrderListBloc>()

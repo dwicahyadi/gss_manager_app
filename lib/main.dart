@@ -20,9 +20,6 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // Initialize Firebase Messaging and get the token
-  await NotificationHandler.initialize();
-
   runApp(const MyApp());
 }
 
@@ -46,13 +43,17 @@ class MyApp extends StatelessWidget {
         darkTheme: darkTheme,
         themeMode: ThemeMode.system,
         home: const SplashScreen(),
+        builder: (context, child) {
+          NotificationHandler.initialize(context);
+          return child!;
+        },
       ),
     );
   }
 }
 
 class NotificationHandler {
-  static Future<void> initialize() async {
+  static Future<void> initialize(BuildContext context) async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
 
     NotificationSettings settings = await messaging.requestPermission(
@@ -71,12 +72,22 @@ class NotificationHandler {
     String? token = await messaging.getToken();
     print('FCM Token: $token');
 
+    // Subscribe to topics
+    await messaging.subscribeToTopic('general');
+    await messaging.subscribeToTopic('report');
+
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('Received a message while in the foreground!');
       print('Message data: ${message.data}');
 
       if (message.notification != null) {
         print('Message also contained a notification: ${message.notification}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message.notification!.title ?? 'New Notification'),
+            duration: Duration(seconds: 3),
+          ),
+        );
       }
     });
 

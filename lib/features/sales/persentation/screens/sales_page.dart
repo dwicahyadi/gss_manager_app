@@ -6,11 +6,21 @@ import 'package:gss_manager_app/shared/persentation/bloc/branches_tabs_event.dar
 import 'package:gss_manager_app/shared/persentation/bloc/branches_tabs_state.dart';
 import 'package:gss_manager_app/shared/persentation/widgets/braches_tab_bar.dart';
 
-class SalesPage extends StatelessWidget {
+class SalesPage extends StatefulWidget {
   const SalesPage({super.key});
 
   @override
+  State<SalesPage> createState() => _SalesPageState();
+}
+
+class _SalesPageState extends State<SalesPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return BlocProvider(
       create: (context) => BranchesBloc()..add(LoadBranches()),
       child: BlocBuilder<BranchesBloc, BranchesState>(
@@ -22,7 +32,7 @@ class SalesPage extends StatelessWidget {
               length: state.branches.length,
               child: Scaffold(
                 appBar: AppBar(
-                  title: const Text('Sales'),
+                  title: const Text('Sales Dashboard'),
                   bottom: BranchesTabBar(branches: state.branches),
                 ),
                 body: TabBarView(

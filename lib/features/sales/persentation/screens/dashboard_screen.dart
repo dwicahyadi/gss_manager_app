@@ -19,6 +19,12 @@ class DashboardScreen extends StatelessWidget {
   final BranchModel branch;
   final formatter = NumberFormat('#,###');
 
+  Future<void> _refreshData(BuildContext context) async {
+    // Implement your data refresh logic here
+    context.read<DashboardBloc>().add(LoadDashboardData(branch.id));
+    context.read<TopSalesmanBloc>().add(LoadTopSalesman(branch.id, 3));
+  }
+
   DashboardScreen({super.key, required this.branch});
 
   @override
@@ -34,48 +40,53 @@ class DashboardScreen extends StatelessWidget {
               TopSalesmanBloc()..add(LoadTopSalesman(branch.id, 3)),
         ),
       ],
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            BlocBuilder<DashboardBloc, DashboardState>(
-              builder: (context, state) {
-                if (state is DashboardLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is DashboardLoaded) {
-                  return _buildDashboardContent(context, state, branch);
-                } else if (state is DashboardError) {
-                  return Text('Error: ${state.message}');
-                } else if (state is DashboardUnauthorized) {
-                  return const UnauthorizedScreen();
-                } else {
-                  return Container();
-                }
-              },
+      child: Builder(builder: (context) {
+        return RefreshIndicator(
+          onRefresh: () => _refreshData(context),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BlocBuilder<DashboardBloc, DashboardState>(
+                  builder: (context, state) {
+                    if (state is DashboardLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (state is DashboardLoaded) {
+                      return _buildDashboardContent(context, state, branch);
+                    } else if (state is DashboardError) {
+                      return Text('Error: ${state.message}');
+                    } else if (state is DashboardUnauthorized) {
+                      return const UnauthorizedScreen();
+                    } else {
+                      return Container();
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
+                Text('Best Salesman',
+                    style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 16),
+                BlocBuilder<TopSalesmanBloc, TopSalesmanState>(
+                  builder: (context, state) {
+                    if (state is TopSalesmanLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (state is TopSalesmanLoaded) {
+                      return _buildTopSalesmanList(context, state.salesmen);
+                    } else if (state is TopSalesmanError) {
+                      return Text('Error: ${state.message}');
+                    } else if (state is TopSalesmanEmpty) {
+                      return const Center(child: Text('No salesmen available'));
+                    } else {
+                      return Container();
+                    }
+                  },
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            Text('Best Salesman',
-                style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(height: 16),
-            BlocBuilder<TopSalesmanBloc, TopSalesmanState>(
-              builder: (context, state) {
-                if (state is TopSalesmanLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is TopSalesmanLoaded) {
-                  return _buildTopSalesmanList(context, state.salesmen);
-                } else if (state is TopSalesmanError) {
-                  return Text('Error: ${state.message}');
-                } else if (state is TopSalesmanEmpty) {
-                  return const Center(child: Text('No salesmen available'));
-                } else {
-                  return Container();
-                }
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      }),
     );
   }
 
@@ -127,6 +138,11 @@ class DashboardScreen extends StatelessWidget {
           value: 'Rp. ${formatter.format(state.unpaidOrderValue)}',
           color: Colors.orange,
           isCritical: true,
+          onTap: () => _navigateToOrdersScreen(
+            context,
+            branch,
+            status: 'UNPAID',
+          ),
         ),
         const SizedBox(height: 16),
         _buildStatCard(

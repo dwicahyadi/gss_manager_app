@@ -25,19 +25,34 @@ class _ProductScreenState extends State<ProductScreen> {
           ProductSoldBloc()..add(LoadProductSoldData(widget.branch.id)),
       child: Scaffold(
         appBar: AppBar(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Product Sold'),
-              Text(
-                'Branch: ${widget.branch.name}',
-                style: const TextStyle(fontSize: 12),
-              ),
-            ],
-          ),
+          title: _isSearching
+              ? TextField(
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Search product name...',
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onChanged: (query) {
+                    setState(() {
+                      _searchQuery = query;
+                    });
+                  },
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Product Sold'),
+                    Text(
+                      'Branch: ${widget.branch.name}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
           actions: [
             IconButton(
-              icon: Icon(_isSearching ? Icons.close : Icons.search),
+              icon: Icon(_isSearching ? Icons.clear : Icons.search),
               onPressed: () {
                 setState(() {
                   _isSearching = !_isSearching;
@@ -46,26 +61,6 @@ class _ProductScreenState extends State<ProductScreen> {
               },
             ),
           ],
-          bottom: _isSearching
-              ? PreferredSize(
-                  preferredSize: const Size.fromHeight(kToolbarHeight),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        hintText: 'Search...',
-                        border: InputBorder.none,
-                        hintStyle: TextStyle(color: Colors.white70),
-                      ),
-                      onChanged: (query) {
-                        setState(() {
-                          _searchQuery = query;
-                        });
-                      },
-                    ),
-                  ),
-                )
-              : null,
         ),
         body: BlocBuilder<ProductSoldBloc, ProductSoldState>(
           builder: (context, state) {
@@ -74,11 +69,8 @@ class _ProductScreenState extends State<ProductScreen> {
             } else if (state is ProductSoldLoaded) {
               final filteredProducts = state.products.where((product) {
                 return product.product.name
-                        .toLowerCase()
-                        .contains(_searchQuery.toLowerCase()) ||
-                    product.product.category!.name
-                        .toLowerCase()
-                        .contains(_searchQuery.toLowerCase());
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase());
               }).toList();
               return ListView.builder(
                 itemCount: filteredProducts.length + 1,
@@ -111,9 +103,9 @@ class _ProductScreenState extends State<ProductScreen> {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                    'Qty: Rp. ${formatter.format(product.quantity)}'),
+                                    'Qty: ${formatter.format(product.quantity)}'),
                                 Text(
-                                    'Amt: ${formatter.format(product.amount)}'),
+                                    'Amt: Rp. ${formatter.format(product.amount)}'),
                               ],
                             ),
                           ),
@@ -127,10 +119,10 @@ class _ProductScreenState extends State<ProductScreen> {
                             padding: const EdgeInsets.all(16.0),
                             child: ElevatedButton(
                               style: ButtonStyle(
-                                backgroundColor: WidgetStateProperty.all(
+                                backgroundColor: MaterialStateProperty.all(
                                     Theme.of(context).primaryColor),
                                 foregroundColor:
-                                    WidgetStateProperty.all(Colors.white),
+                                    MaterialStateProperty.all(Colors.white),
                               ),
                               onPressed: () {
                                 context

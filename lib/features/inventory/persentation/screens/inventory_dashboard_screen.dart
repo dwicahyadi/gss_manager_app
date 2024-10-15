@@ -6,11 +6,22 @@ import 'package:gss_manager_app/features/inventory/persentation/screens/stock_br
 import 'package:gss_manager_app/shared/persentation/widgets/stat_card.dart';
 import 'package:intl/intl.dart';
 
-class InventoryDashboardScreen extends StatelessWidget {
+class InventoryDashboardScreen extends StatefulWidget {
   const InventoryDashboardScreen({super.key});
 
   @override
+  State<InventoryDashboardScreen> createState() =>
+      _InventoryDashboardScreenState();
+}
+
+class _InventoryDashboardScreenState extends State<InventoryDashboardScreen>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final formatter = NumberFormat('#,###');
 
     return MultiBlocProvider(

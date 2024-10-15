@@ -31,7 +31,7 @@ class StockBranchBloc extends Bloc<StockBranchEvent, StockBranchState> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body)['data'] as List;
         final stocks = data.map((json) => StockModel.fromJson(json)).toList();
-        final nextPageUrl = json.decode(response.body)['links']['next'];
+        final nextPageUrl = json.decode(response.body)['links']?['next'];
         emit(StockBranchLoaded(stocks: stocks, nextPageUrl: nextPageUrl));
       } else {
         emit(StockBranchError('Failed to load stock data'));
